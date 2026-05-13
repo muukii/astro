@@ -2,6 +2,9 @@ import { Buffer } from "node:buffer";
 import { marked } from "marked";
 import { renderMermaidSVG } from "beautiful-mermaid";
 import sanitizeHtml from "sanitize-html";
+import { codeToHtml } from "shiki";
+import xcodeDarkTheme from "../themes/xcode-dark.json";
+import xcodeLightTheme from "../themes/xcode-light.json";
 import {
   fetchCraftBlocks,
   fetchCraftCollectionItems,
@@ -13,40 +16,87 @@ import {
   type CraftDocument,
 } from "./craft";
 
+const MERMAID_ARROW_COLOR = "#7aa2ff";
+
 export type BlogPost = {
   id: string;
   slug: string;
+  path: string;
   title: string;
   excerpt: string;
   publishedAt?: string;
   updatedAt?: string;
   tags: string[];
   html: string;
+  breadcrumbs: BlogBreadcrumb[];
 };
 
-let cachedPosts: Promise<BlogPost[]> | undefined;
+export type BlogBreadcrumb = {
+  title: string;
+  path: string;
+};
 
-export function getBlogPosts() {
-  cachedPosts ??= loadBlogPosts();
-  return cachedPosts;
+type BlogContent = {
+  posts: BlogPost[];
+  pages: BlogPost[];
+};
+
+type BlogPostResult = {
+  post: BlogPost;
+  pages: BlogPost[];
+};
+
+type RenderContext = {
+  pages: BlogPost[];
+  path: string;
+  breadcrumbs: BlogBreadcrumb[];
+  publishedAt?: string;
+  updatedAt?: string;
+  tags: string[];
+};
+
+let cachedContent: Promise<BlogContent> | undefined;
+
+function getBlogContent() {
+  cachedContent ??= loadBlogContent();
+  return cachedContent;
 }
 
-export async function getBlogPost(slug: string) {
-  const posts = await getBlogPosts();
-  return posts.find((post) => post.slug === slug);
+export async function getBlogPosts() {
+  return (await getBlogContent()).posts;
 }
 
-async function loadBlogPosts(): Promise<BlogPost[]> {
+export async function getBlogPages() {
+  return (await getBlogContent()).pages;
+}
+
+export async function getBlogPost(path: string | undefined) {
+  const routePath = normalizeRoutePath(path);
+  const pages = await getBlogPages();
+  return pages.find((post) => post.path === routePath);
+}
+
+async function loadBlogContent(): Promise<BlogContent> {
   const collectionItems = await loadCollectionItems();
 
   if (collectionItems.length) {
-    return sortPosts(collectionItems.map(collectionItemToPost));
+    const results = await Promise.all(collectionItems.map(collectionItemToPost));
+    const posts = sortPosts(results.map((result) => result.post));
+
+    return {
+      posts,
+      pages: results.flatMap((result) => [result.post, ...result.pages]),
+    };
   }
 
   const documents = await listCraftDocuments();
-  const posts = await Promise.all(documents.map(documentToPost));
+  const results = await Promise.all(documents.map(documentToPost));
+  const posts = sortPosts(results.map((result) => result.post));
 
-  return sortPosts(posts);
+  return {
+    posts,
+    pages: results.flatMap((result) => [result.post, ...result.pages]),
+  };
 }
 
 async function loadCollectionItems(): Promise<CraftCollectionItem[]> {
@@ -78,51 +128,89 @@ function sortPosts(posts: BlogPost[]) {
   });
 }
 
-async function documentToPost(document: CraftDocument): Promise<BlogPost> {
+async function documentToPost(document: CraftDocument): Promise<BlogPostResult> {
   const blocks = await fetchCraftBlocks(document.id);
-  const markdown = blocksToMarkdown(blocks);
-  const html = sanitize(await marked.parse(markdown));
   const title = firstHeading(blocks) ?? document.title;
-
-  return {
-    id: document.id,
-    slug: `${slugify(title)}-${document.id.slice(0, 8)}`,
-    title,
-    excerpt: firstParagraph(blocks) ?? "",
-    publishedAt: firstDate(document.createdAt),
-    updatedAt: firstDate(document.lastModifiedAt),
+  const slug = pathSlug(title, document.id);
+  const pages: BlogPost[] = [];
+  const publishedAt = firstDate(document.createdAt);
+  const updatedAt = firstDate(document.lastModifiedAt);
+  const breadcrumbs = [{ title, path: slug }];
+  const markdown = await blocksToMarkdown(blocks, {
+    pages,
+    path: slug,
+    breadcrumbs,
+    publishedAt,
+    updatedAt,
     tags: [],
-    html,
-  };
-}
-
-function collectionItemToPost(item: CraftCollectionItem): BlogPost {
-  const blocks = item.content ?? [];
-  const markdown = blocksToMarkdown(blocks);
-  const title = item.title || item.markdown || "Untitled";
+  });
 
   return {
-    id: item.id,
-    slug: `${slugify(title)}-${item.id.slice(0, 8)}`,
-    title,
-    excerpt: firstParagraph(blocks) ?? "",
-    publishedAt: firstDate(propertyString(item.properties.date)),
-    updatedAt: firstDate(item.metadata?.lastModifiedAt),
-    tags: propertyStrings(item.properties.tags),
-    html: sanitize(marked.parse(markdown, { async: false }) as string),
+    post: {
+      id: document.id,
+      slug,
+      path: slug,
+      title,
+      excerpt: firstParagraph(blocks) ?? "",
+      publishedAt,
+      updatedAt,
+      tags: [],
+      html: sanitize(await marked.parse(markdown)),
+      breadcrumbs,
+    },
+    pages,
   };
 }
 
-function blocksToMarkdown(blocks: CraftBlock[], depth = 0): string {
-  return blocks
-    .map((block) => blockToMarkdown(block, depth))
-    .filter(Boolean)
-    .join("\n\n");
+async function collectionItemToPost(item: CraftCollectionItem): Promise<BlogPostResult> {
+  const blocks = item.content ?? [];
+  const title = item.title || item.markdown || "Untitled";
+  const slug = pathSlug(title, item.id);
+  const pages: BlogPost[] = [];
+  const publishedAt = firstDate(propertyString(item.properties.date));
+  const updatedAt = firstDate(item.metadata?.lastModifiedAt);
+  const tags = propertyStrings(item.properties.tags);
+  const breadcrumbs = [{ title, path: slug }];
+  const markdown = await blocksToMarkdown(blocks, {
+    pages,
+    path: slug,
+    breadcrumbs,
+    publishedAt,
+    updatedAt,
+    tags,
+  });
+
+  return {
+    post: {
+      id: item.id,
+      slug,
+      path: slug,
+      title,
+      excerpt: firstParagraph(blocks) ?? "",
+      publishedAt,
+      updatedAt,
+      tags,
+      html: sanitize(marked.parse(markdown, { async: false }) as string),
+      breadcrumbs,
+    },
+    pages,
+  };
 }
 
-function blockToMarkdown(block: CraftBlock, depth: number): string {
-  const childMarkdown = Array.isArray(block.content) ? blocksToMarkdown(block.content, depth + 1) : "";
+async function blocksToMarkdown(
+  blocks: CraftBlock[],
+  context: RenderContext,
+  depth = 0,
+): Promise<string> {
+  const markdown = await Promise.all(blocks.map((block) => blockToMarkdown(block, context, depth)));
+  return markdown.filter(Boolean).join("\n\n");
+}
 
+async function blockToMarkdown(
+  block: CraftBlock,
+  context: RenderContext,
+  depth: number,
+): Promise<string> {
   if (block.type === "image" && block.url) {
     return `![${block.altText ?? ""}](${block.url})`;
   }
@@ -142,20 +230,99 @@ function blockToMarkdown(block: CraftBlock, depth: number): string {
       return renderMermaid(block.rawCode ?? block.markdown ?? "");
     }
 
-    return `\`\`\`${language}\n${block.rawCode ?? block.markdown ?? ""}\n\`\`\``;
+    return renderCodeBlock(block.rawCode ?? block.markdown ?? "", language);
   }
 
   if (block.type === "page" || block.type === "collectionItem") {
-    const title = textFromTitle(block) ?? block.markdown;
-    return [`${"#".repeat(Math.min(depth + 2, 6))} ${title}`, childMarkdown]
-      .filter(Boolean)
-      .join("\n\n");
+    return renderNestedPage(block, context);
   }
 
+  const childMarkdown = Array.isArray(block.content)
+    ? await blocksToMarkdown(block.content, context, depth + 1)
+    : "";
   const markdown = block.markdown ?? "";
   const styledMarkdown = applyBlockStyle(markdown, block);
 
   return [styledMarkdown, childMarkdown].filter(Boolean).join("\n\n");
+}
+
+async function renderNestedPage(block: CraftBlock, parentContext: RenderContext) {
+  if (block.properties?.hidden === true) {
+    return "";
+  }
+
+  const title = stripMarkdown(textFromTitle(block) ?? block.markdown ?? "Untitled");
+  const id = block.id ?? title;
+  const slug = pathSlug(title, id);
+  const path = `${parentContext.path}/${slug}`;
+  const content = block.content ?? [];
+  const excerpt = firstParagraph(content) ?? "";
+  const updatedAt = firstDate(block.metadata?.lastModifiedAt) ?? parentContext.updatedAt;
+  const breadcrumbs = [...parentContext.breadcrumbs, { title, path }];
+  const context: RenderContext = {
+    ...parentContext,
+    path,
+    breadcrumbs,
+    updatedAt,
+  };
+  const markdown = await blocksToMarkdown(content, context);
+
+  parentContext.pages.push({
+    id,
+    slug,
+    path,
+    title,
+    excerpt,
+    publishedAt: parentContext.publishedAt,
+    updatedAt,
+    tags: parentContext.tags,
+    html: sanitize(marked.parse(markdown, { async: false }) as string),
+    breadcrumbs,
+  });
+
+  return renderPagePreview({ title, excerpt, path });
+}
+
+async function renderCodeBlock(code: string, language: string) {
+  const normalizedLanguage = normalizeLanguage(language);
+  const highlightedHtml = await highlightCode(code, normalizedLanguage);
+  const languageLabel = language ? `<figcaption>${escapeHtml(language)}</figcaption>` : "";
+
+  return `<figure class="code-card">
+  ${languageLabel}
+  ${highlightedHtml}
+</figure>`;
+}
+
+async function highlightCode(code: string, language: string) {
+  const options = {
+    lang: language,
+    themes: {
+      light: xcodeLightTheme,
+      dark: xcodeDarkTheme,
+    },
+    defaultColor: false,
+  } as const;
+
+  try {
+    return await codeToHtml(code, options);
+  } catch {
+    if (language !== "text") {
+      return codeToHtml(code, { ...options, lang: "text" });
+    }
+
+    return `<pre class="shiki"><code>${escapeHtml(code)}</code></pre>`;
+  }
+}
+
+function normalizeLanguage(language: string) {
+  const normalized = language.trim().toLowerCase();
+
+  if (!normalized || normalized === "plain" || normalized === "plaintext") {
+    return "text";
+  }
+
+  return normalized;
 }
 
 function applyBlockStyle(markdown: string, block: CraftBlock) {
@@ -247,12 +414,23 @@ function renderLinkPreview(block: CraftBlock) {
 </a>`;
 }
 
+function renderPagePreview(page: Pick<BlogPost, "title" | "excerpt" | "path">) {
+  return `<a class="page-preview" href="${escapeHtml(postHref(page.path))}">
+  <span class="page-preview__icon" aria-hidden="true"></span>
+  <span class="page-preview__content">
+    <strong>${escapeHtml(page.title)}</strong>
+    ${page.excerpt ? `<span>${escapeHtml(page.excerpt)}</span>` : ""}
+  </span>
+</a>`;
+}
+
 function renderMermaid(code: string) {
   try {
-    const svg = renderMermaidSVG(code, {
+    const svg = renderMermaidSVG(withDefaultMermaidArrowStyle(code), {
       bg: "#ffffff",
       fg: "#171717",
-      accent: "#171717",
+      line: MERMAID_ARROW_COLOR,
+      accent: MERMAID_ARROW_COLOR,
       muted: "#737373",
       border: "#e5e5e5",
       surface: "#f5f5f5",
@@ -272,6 +450,19 @@ function renderMermaid(code: string) {
   }
 }
 
+function withDefaultMermaidArrowStyle(code: string) {
+  const source = code.trimEnd();
+  const isFlowchart = /^\s*(graph|flowchart)\b/im.test(source);
+  const hasArrow = /(?:-->|==>|-.->|<-->|<--|<==|<-\.->|<-.--)/.test(source);
+  const hasDefaultLinkStyle = /^\s*linkStyle\s+default\b/im.test(source);
+
+  if (!isFlowchart || !hasArrow || hasDefaultLinkStyle) {
+    return source;
+  }
+
+  return `${source}\nlinkStyle default stroke:${MERMAID_ARROW_COLOR},stroke-width:2px`;
+}
+
 function firstDate(value: string | undefined) {
   if (!value) {
     return undefined;
@@ -279,6 +470,32 @@ function firstDate(value: string | undefined) {
 
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
+}
+
+function pathSlug(title: string, id: string) {
+  return `${slugify(title)}-${id.slice(0, 8)}`;
+}
+
+function postHref(path: string) {
+  const basePath = import.meta.env.BASE_URL.endsWith("/")
+    ? import.meta.env.BASE_URL
+    : `${import.meta.env.BASE_URL}/`;
+  return `${basePath}posts/${path.replace(/^\/+|\/+$/g, "")}/`;
+}
+
+function normalizeRoutePath(value: string | undefined) {
+  return (value ?? "")
+    .replace(/^\/+|\/+$/g, "")
+    .split("/")
+    .filter(Boolean)
+    .map((segment) => {
+      try {
+        return decodeURIComponent(segment);
+      } catch {
+        return segment;
+      }
+    })
+    .join("/");
 }
 
 function slugify(value: string) {
@@ -329,6 +546,10 @@ function escapeHtml(value: string) {
 }
 
 function sanitize(html: string) {
+  const basePath = import.meta.env.BASE_URL.endsWith("/")
+    ? import.meta.env.BASE_URL
+    : `${import.meta.env.BASE_URL}/`;
+
   return sanitizeHtml(html, {
     allowedTags: sanitizeHtml.defaults.allowedTags.concat([
       "figcaption",
@@ -361,13 +582,36 @@ function sanitize(html: string) {
         "role",
       ],
       a: ["href", "name", "target", "rel"],
+      code: ["class"],
+      figcaption: ["class"],
       img: ["src", "alt", "title", "width", "height", "loading"],
+      pre: ["class", "style", "tabindex"],
+      span: ["class", "style"],
     },
     allowedSchemesByTag: {
       img: ["http", "https", "data"],
     },
     transformTags: {
-      a: sanitizeHtml.simpleTransform("a", { rel: "noreferrer", target: "_blank" }),
+      a: (tagName, attribs) => {
+        const classNames = (attribs.class ?? "").split(/\s+/);
+        const href = attribs.href ?? "";
+        const isInternalPageLink =
+          classNames.includes("page-preview") || href.startsWith(`${basePath}posts/`);
+
+        if (isInternalPageLink) {
+          const { rel: _rel, target: _target, ...internalAttribs } = attribs;
+          return { tagName, attribs: internalAttribs };
+        }
+
+        return {
+          tagName,
+          attribs: {
+            ...attribs,
+            rel: "noreferrer",
+            target: "_blank",
+          },
+        };
+      },
       img: sanitizeHtml.simpleTransform("img", { loading: "lazy" }),
     },
   });

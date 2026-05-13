@@ -1,0 +1,189 @@
+{
+  "name": "xcode-framer-based-5",
+  "type": "dark",
+  "colors": {
+    "editor.background": "#0c0c0c",
+    "editor.foreground": "#386da9",
+    "editor.lineHighlightBackground": "#ffffff0f",
+    "editor.selectionBackground": "#4b4b4b36",
+    "editorCursor.foreground": "#ffffff83",
+    "editorWhitespace.foreground": "#424d5b1e"
+  },
+  "tokenColors": [
+    {
+      "scope": [
+        "source"
+      ],
+      "settings": {
+        "foreground": "#386da9"
+      }
+    },
+    {
+      "scope": [
+        "comment",
+        "punctuation.definition.comment"
+      ],
+      "settings": {
+        "foreground": "#904fff80",
+        "fontStyle": "italic"
+      }
+    },
+    {
+      "scope": [
+        "comment.block.documentation",
+        "comment.line.documentation"
+      ],
+      "settings": {
+        "foreground": "#fc1b3c87",
+        "fontStyle": "italic"
+      }
+    },
+    {
+      "scope": [
+        "keyword",
+        "storage",
+        "storage.type",
+        "storage.modifier"
+      ],
+      "settings": {
+        "foreground": "#ff3e2d"
+      }
+    },
+    {
+      "scope": [
+        "keyword.control.import",
+        "meta.preprocessor",
+        "entity.name.function.preprocessor"
+      ],
+      "settings": {
+        "foreground": "#ffb28f"
+      }
+    },
+    {
+      "scope": [
+        "string",
+        "punctuation.definition.string"
+      ],
+      "settings": {
+        "foreground": "#b150d9"
+      }
+    },
+    {
+      "scope": [
+        "constant.character",
+        "string.quoted.single"
+      ],
+      "settings": {
+        "foreground": "#b150d9"
+      }
+    },
+    {
+      "scope": [
+        "constant.numeric",
+        "constant.language.boolean"
+      ],
+      "settings": {
+        "foreground": "#b150d9"
+      }
+    },
+    {
+      "scope": [
+        "string.regexp"
+      ],
+      "settings": {
+        "foreground": "#864aff"
+      }
+    },
+    {
+      "scope": [
+        "entity.name.function",
+        "support.function",
+        "variable.function"
+      ],
+      "settings": {
+        "foreground": "#1697f6"
+      }
+    },
+    {
+      "scope": [
+        "entity.name.function.macro"
+      ],
+      "settings": {
+        "foreground": "#ffb28f"
+      }
+    },
+    {
+      "scope": [
+        "entity.name.type",
+        "entity.name.class",
+        "entity.name.struct",
+        "entity.name.enum",
+        "support.type",
+        "support.class"
+      ],
+      "settings": {
+        "foreground": "#e2bffd"
+      }
+    },
+    {
+      "scope": [
+        "entity.name.tag",
+        "entity.other.attribute-name"
+      ],
+      "settings": {
+        "foreground": "#1697f6"
+      }
+    },
+    {
+      "scope": [
+        "variable",
+        "variable.other",
+        "variable.parameter"
+      ],
+      "settings": {
+        "foreground": "#ec58ff"
+      }
+    },
+    {
+      "scope": [
+        "constant.other",
+        "variable.other.constant",
+        "support.constant"
+      ],
+      "settings": {
+        "foreground": "#ff7f2c"
+      }
+    },
+    {
+      "scope": [
+        "meta.attribute",
+        "support.attribute"
+      ],
+      "settings": {
+        "foreground": "#864aff"
+      }
+    },
+    {
+      "scope": [
+        "markup.raw",
+        "markup.inline.raw"
+      ],
+      "settings": {
+        "foreground": "#d59dff"
+      }
+    },
+    {
+      "scope": [
+        "markup.underline.link"
+      ],
+      "settings": {
+        "foreground": "#864aff"
+      }
+    }
+  ],
+  "metadata": {
+    "source": "Xcode Font and Color Theme",
+    "sourceTheme": "Framer-based 5",
+    "sourceFile": "Framer-based 5.xccolortheme"
+  }
+}

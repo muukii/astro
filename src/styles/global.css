@@ -329,6 +329,42 @@
     text-transform: uppercase;
   }
 
+  .breadcrumbs {
+    margin-bottom: 1.25rem;
+    color: var(--muted-foreground);
+    font-size: 0.9rem;
+  }
+
+  .breadcrumbs ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .breadcrumbs li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-width: 0;
+  }
+
+  .breadcrumbs li:not(:last-child)::after {
+    content: "/";
+    color: color-mix(in oklch, var(--muted-foreground) 55%, transparent);
+  }
+
+  .breadcrumbs a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .breadcrumbs a:hover {
+    color: var(--foreground);
+  }
+
   .post-body {
     max-width: 48rem;
     padding-bottom: 6rem;
@@ -366,7 +402,7 @@
     color: color-mix(in oklch, var(--foreground) 82%, var(--muted-foreground));
   }
 
-  .post-body a:not(.link-preview) {
+  .post-body a:not(.link-preview):not(.page-preview) {
     color: var(--foreground);
     text-decoration: underline;
     text-decoration-color: color-mix(in oklch, var(--foreground) 25%, transparent);
@@ -381,7 +417,7 @@
     font-size: 0.92em;
   }
 
-  .post-body pre {
+  .post-body pre:not(.shiki) {
     overflow-x: auto;
     border: 1px solid var(--border);
     border-radius: var(--radius-xl);
@@ -389,10 +425,63 @@
     padding: 1.25rem;
   }
 
-  .post-body pre code {
+  .post-body pre:not(.shiki) code {
     border: 0;
     background: transparent;
     padding: 0;
+  }
+
+  .code-card {
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    background: color-mix(in oklch, var(--muted) 72%, var(--card));
+  }
+
+  .code-card figcaption {
+    border-bottom: 1px solid var(--border);
+    padding: 0.55rem 0.85rem;
+    color: var(--muted-foreground);
+    font-size: 0.78rem;
+    font-weight: 560;
+    text-transform: uppercase;
+  }
+
+  .shiki {
+    overflow-x: auto;
+    margin: 0;
+    background: var(--shiki-light-bg) !important;
+    padding: 1rem;
+    font-size: 0.92rem;
+    line-height: 1.7;
+  }
+
+  .dark .shiki {
+    background: var(--shiki-dark-bg) !important;
+  }
+
+  .shiki code {
+    display: grid;
+    border: 0;
+    background: transparent;
+    padding: 0;
+  }
+
+  .shiki,
+  .shiki span {
+    color: var(--shiki-light);
+    background-color: transparent;
+    font-style: var(--shiki-light-font-style);
+    font-weight: var(--shiki-light-font-weight);
+    text-decoration: var(--shiki-light-text-decoration);
+  }
+
+  .dark .shiki,
+  .dark .shiki span {
+    color: var(--shiki-dark);
+    font-style: var(--shiki-dark-font-style);
+    font-weight: var(--shiki-dark-font-weight);
+    text-decoration: var(--shiki-dark-text-decoration);
   }
 
   .post-body img {
@@ -460,6 +549,67 @@
     color: var(--secondary-foreground);
   }
 
+  .page-preview {
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr);
+    align-items: center;
+    gap: 0.75rem;
+    border-radius: var(--radius-md);
+    padding: 0.2rem 0.25rem;
+    color: var(--foreground);
+    text-decoration: none;
+    transition:
+      background-color 160ms ease,
+      color 160ms ease;
+  }
+
+  .page-preview:hover {
+    background: color-mix(in oklch, var(--accent) 72%, transparent);
+  }
+
+  .page-preview__icon {
+    position: relative;
+    display: block;
+    width: 2rem;
+    height: 2.35rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: color-mix(in oklch, var(--card) 84%, var(--muted));
+  }
+
+  .page-preview__icon::after {
+    content: "";
+    position: absolute;
+    top: 0.62rem;
+    left: 0.5rem;
+    width: 0.75rem;
+    height: 1px;
+    background: var(--muted-foreground);
+    box-shadow: 0 0.42rem 0 color-mix(in oklch, var(--muted-foreground) 70%, transparent);
+  }
+
+  .page-preview__content {
+    display: grid;
+    min-width: 0;
+    gap: 0.08rem;
+  }
+
+  .page-preview__content strong {
+    overflow-wrap: anywhere;
+    font-size: 1rem;
+    font-weight: 650;
+    line-height: 1.25;
+  }
+
+  .page-preview__content span {
+    overflow: hidden;
+    color: var(--muted-foreground);
+    font-size: 0.95rem;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .mermaid-card {
     overflow: hidden;
     border: 1px solid var(--border);
@@ -468,15 +618,19 @@
   }
 
   .mermaid-card__canvas {
+    display: grid;
     overflow-x: auto;
-    padding: 1rem;
+    place-items: center;
+    padding: 1.25rem;
   }
 
   .mermaid-card__image {
     display: block;
-    width: min(100%, 42rem);
+    width: min(100%, 28rem);
+    max-height: 24rem;
     height: auto;
     margin-inline: auto;
+    object-fit: contain;
   }
 }
 

@@ -39,7 +39,7 @@ function formatDate(value: string | undefined) {
         <section class="post-list" aria-label="Posts">
           {posts.map((post) => (
             <Card className="post-card">
-              <a class="post-card__link" href={withBasePath(`posts/${post.slug}/`)}>
+              <a class="post-card__link" href={withBasePath(`posts/${post.path}/`)}>
                 <time datetime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
                 <span class="post-card__body">
                   <h2>{post.title}</h2>

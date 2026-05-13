@@ -1,17 +1,17 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { Badge } from "@/components/ui/badge";
-import { getBlogPost, getBlogPosts } from "../../lib/blog";
+import { getBlogPages, getBlogPost } from "../../lib/blog";
 
 export async function getStaticPaths() {
-  const posts = await getBlogPosts();
+  const pages = await getBlogPages();
 
-  return posts.map((post) => ({
-    params: { slug: post.slug },
+  return pages.map((post) => ({
+    params: { slug: post.path },
   }));
 }
 
-const post = await getBlogPost(Astro.params.slug ?? "");
+const post = await getBlogPost(Astro.params.slug);
 
 if (!post) {
   const basePath = import.meta.env.BASE_URL.endsWith("/")
@@ -19,6 +19,11 @@ if (!post) {
     : `${import.meta.env.BASE_URL}/`;
   return Astro.redirect(basePath);
 }
+
+const basePath = import.meta.env.BASE_URL.endsWith("/")
+  ? import.meta.env.BASE_URL
+  : `${import.meta.env.BASE_URL}/`;
+const withBasePath = (path: string) => `${basePath}${path.replace(/^\//, "")}`;
 
 function formatDate(value: string | undefined) {
   if (!value) {
@@ -36,6 +41,21 @@ function formatDate(value: string | undefined) {
 <BaseLayout title={post.title} description={post.excerpt}>
   <article>
     <header class="article-header">
+      {post.breadcrumbs.length > 1 && (
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <ol>
+            {post.breadcrumbs.map((crumb, index) => (
+              <li>
+                {index === post.breadcrumbs.length - 1 ? (
+                  <span aria-current="page">{crumb.title}</span>
+                ) : (
+                  <a href={withBasePath(`posts/${crumb.path}/`)}>{crumb.title}</a>
+                )}
+              </li>
+            ))}
+          </ol>
+        </nav>
+      )}
       <Badge variant="outline" className="article-label">Article</Badge>
       <h1>{post.title}</h1>
       <p class="article-meta">
