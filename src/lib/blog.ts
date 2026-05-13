@@ -1,4 +1,6 @@
+import { Buffer } from "node:buffer";
 import { marked } from "marked";
+import { renderMermaidSVG } from "beautiful-mermaid";
 import sanitizeHtml from "sanitize-html";
 import {
   fetchCraftBlocks,
@@ -125,12 +127,21 @@ function blockToMarkdown(block: CraftBlock, depth: number): string {
     return `![${block.altText ?? ""}](${block.url})`;
   }
 
+  if (block.type === "richUrl" && block.url) {
+    return renderLinkPreview(block);
+  }
+
   if (block.type === "line") {
     return "---";
   }
 
   if (block.type === "code") {
     const language = block.language ?? "";
+
+    if (language.toLowerCase() === "mermaid") {
+      return renderMermaid(block.rawCode ?? block.markdown ?? "");
+    }
+
     return `\`\`\`${language}\n${block.rawCode ?? block.markdown ?? ""}\n\`\`\``;
   }
 
@@ -220,6 +231,47 @@ function textFromTitle(block: CraftBlock) {
   return typeof block.title?.markdown === "string" ? block.title.markdown : undefined;
 }
 
+function renderLinkPreview(block: CraftBlock) {
+  const title = textFromTitle(block) ?? block.markdown ?? block.url ?? "Link";
+  const description = block.description ?? "";
+  const url = block.url ?? "";
+  const domain = domainForUrl(url);
+
+  return `<a class="link-preview" href="${escapeHtml(url)}">
+  <span class="link-preview__content">
+    <span class="link-preview__label">${escapeHtml(domain)}</span>
+    <strong>${escapeHtml(stripMarkdown(title))}</strong>
+    ${description ? `<span>${escapeHtml(description)}</span>` : ""}
+  </span>
+  <span class="link-preview__arrow" aria-hidden="true">↗</span>
+</a>`;
+}
+
+function renderMermaid(code: string) {
+  try {
+    const svg = renderMermaidSVG(code, {
+      bg: "#ffffff",
+      fg: "#171717",
+      accent: "#171717",
+      muted: "#737373",
+      border: "#e5e5e5",
+      surface: "#f5f5f5",
+      transparent: true,
+    });
+
+    const encodedSvg = Buffer.from(svg).toString("base64");
+
+    return `<figure class="mermaid-card">
+  <div class="mermaid-card__canvas">
+    <img class="mermaid-card__image" alt="Mermaid diagram" src="data:image/svg+xml;base64,${encodedSvg}">
+  </div>
+</figure>`;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return `\`\`\`mermaid\n${code}\n\n${message}\n\`\`\``;
+  }
+}
+
 function firstDate(value: string | undefined) {
   if (!value) {
     return undefined;
@@ -242,7 +294,8 @@ function stripMarkdown(value: string) {
   return value
     .replace(/!\[[^\]]*]\([^)]*\)/g, "")
     .replace(/\[([^\]]+)]\([^)]*\)/g, "$1")
-    .replace(/[#*_`>~-]/g, "")
+    .replace(/#/g, "")
+    .replace(/[*_`>~]/g, "")
     .trim();
 }
 
@@ -258,13 +311,60 @@ function propertyStrings(value: unknown) {
   return value.filter((item): item is string => typeof item === "string" && item.trim().length > 0);
 }
 
+function domainForUrl(value: string) {
+  try {
+    return new URL(value).hostname.replace(/^www\./, "");
+  } catch {
+    return value;
+  }
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function sanitize(html: string) {
   return sanitizeHtml(html, {
-    allowedTags: sanitizeHtml.defaults.allowedTags.concat(["img", "h1", "h2", "h3", "h4", "h5", "h6"]),
+    allowedTags: sanitizeHtml.defaults.allowedTags.concat([
+      "figcaption",
+      "figure",
+      "img",
+      "span",
+      "strong",
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "h5",
+      "h6",
+    ]),
     allowedAttributes: {
       ...sanitizeHtml.defaults.allowedAttributes,
+      "*": [
+        "aria-hidden",
+        "aria-label",
+        "class",
+        "data-arrow-end",
+        "data-arrow-start",
+        "data-from",
+        "data-id",
+        "data-label",
+        "data-shape",
+        "data-style",
+        "data-to",
+        "id",
+        "role",
+      ],
       a: ["href", "name", "target", "rel"],
       img: ["src", "alt", "title", "width", "height", "loading"],
+    },
+    allowedSchemesByTag: {
+      img: ["http", "https", "data"],
     },
     transformTags: {
       a: sanitizeHtml.simpleTransform("a", { rel: "noreferrer", target: "_blank" }),

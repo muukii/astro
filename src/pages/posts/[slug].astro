@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import { Badge } from "@/components/ui/badge";
 import { getBlogPost, getBlogPosts } from "../../lib/blog";
 
 export async function getStaticPaths() {
@@ -34,13 +35,20 @@ function formatDate(value: string | undefined) {
 
 <BaseLayout title={post.title} description={post.excerpt}>
   <article>
-    <header class="post-header">
-      <p class="eyebrow">Article</p>
+    <header class="article-header">
+      <Badge variant="outline" className="article-label">Article</Badge>
       <h1>{post.title}</h1>
-      <p class="post-meta">
+      <p class="article-meta">
         <time datetime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
         {post.updatedAt && <> / Updated {formatDate(post.updatedAt)}</>}
       </p>
+      {post.tags.length > 0 && (
+        <span class="tags" aria-label="Tags">
+          {post.tags.map((tag) => (
+            <Badge variant="secondary" className="tag-badge">{tag}</Badge>
+          ))}
+        </span>
+      )}
     </header>
     <div class="post-body" set:html={post.html} />
   </article>

@@ -15,6 +15,7 @@ export type CraftBlock = Record<string, unknown> & {
   textStyle?: string;
   listStyle?: string;
   url?: string;
+  description?: string;
   altText?: string;
   title?: string | {
     markdown?: string;

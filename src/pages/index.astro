@@ -1,5 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import { getBlogPosts } from "../lib/blog";
 import { isCraftConfigured } from "../lib/craft";
 
@@ -25,8 +27,8 @@ function formatDate(value: string | undefined) {
 ---
 
 <BaseLayout title={siteTitle}>
-  <section class="hero">
-    <p class="eyebrow">Craft powered blog</p>
+  <section class="home-hero">
+    <p class="eyebrow">Journal</p>
     <h1>{siteTitle}</h1>
     <p>Craft のドキュメントをデータソースにして、Astro が静的なブログとして出力します。</p>
   </section>
@@ -36,30 +38,32 @@ function formatDate(value: string | undefined) {
       posts.length ? (
         <section class="post-list" aria-label="Posts">
           {posts.map((post) => (
-            <a class="post-row" href={withBasePath(`posts/${post.slug}/`)}>
-              <time datetime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
-              <span>
-                <h2>{post.title}</h2>
-                {post.excerpt && <p>{post.excerpt}</p>}
-                {post.tags.length > 0 && (
-                  <ul class="tags" aria-label="Tags">
-                    {post.tags.map((tag) => (
-                      <li>{tag}</li>
-                    ))}
-                  </ul>
-                )}
-              </span>
-            </a>
+            <Card className="post-card">
+              <a class="post-card__link" href={withBasePath(`posts/${post.slug}/`)}>
+                <time datetime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
+                <span class="post-card__body">
+                  <h2>{post.title}</h2>
+                  {post.excerpt && <p>{post.excerpt}</p>}
+                  {post.tags.length > 0 && (
+                    <span class="tags" aria-label="Tags">
+                      {post.tags.map((tag) => (
+                        <Badge variant="secondary" className="tag-badge">{tag}</Badge>
+                      ))}
+                    </span>
+                  )}
+                </span>
+              </a>
+            </Card>
           ))}
         </section>
       ) : (
-        <section class="setup">
+        <Card className="setup-card">
           <h2>Craft の記事が見つかりませんでした</h2>
           <p><code>CRAFT_COLLECTION_ID</code> または <code>CRAFT_COLLECTION_NAME</code> の対象を確認してください。</p>
-        </section>
+        </Card>
       )
     ) : (
-      <section class="setup">
+      <Card className="setup-card">
         <h2>Craft API を接続してください</h2>
         <p>
           Craft の Imagine タブで API connection を作り、発行された API URL を
@@ -68,7 +72,7 @@ function formatDate(value: string | undefined) {
         <pre><code>CRAFT_API_BASE_URL="https://connect.craft.do/links/YOUR_ID/api/v1"
 CRAFT_COLLECTION_NAME="Posts"
 SITE_TITLE="Craft Journal"</code></pre>
-      </section>
+      </Card>
     )
   }
 </BaseLayout>
