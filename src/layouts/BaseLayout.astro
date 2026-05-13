@@ -6,14 +6,18 @@ type Props = {
 
 const siteTitle = import.meta.env.SITE_TITLE ?? "Craft Journal";
 const { title, description = "A blog powered by Craft and Astro." } = Astro.props;
+const basePath = import.meta.env.BASE_URL.endsWith("/")
+  ? import.meta.env.BASE_URL
+  : `${import.meta.env.BASE_URL}/`;
+const withBasePath = (path: string) => `${basePath}${path.replace(/^\//, "")}`;
 ---
 
 <!doctype html>
 <html lang="ja">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" href="/favicon.ico" />
+    <link rel="icon" type="image/svg+xml" href={withBasePath("favicon.svg")} />
+    <link rel="icon" href={withBasePath("favicon.ico")} />
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
@@ -21,7 +25,7 @@ const { title, description = "A blog powered by Craft and Astro." } = Astro.prop
   </head>
   <body>
     <header class="site-header">
-      <a class="brand" href="/">{siteTitle}</a>
+      <a class="brand" href={basePath}>{siteTitle}</a>
     </header>
     <main>
       <slot />

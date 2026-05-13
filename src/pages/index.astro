@@ -6,6 +6,10 @@ import { isCraftConfigured } from "../lib/craft";
 const configured = isCraftConfigured();
 const posts = configured ? await getBlogPosts() : [];
 const siteTitle = import.meta.env.SITE_TITLE ?? "Craft Journal";
+const basePath = import.meta.env.BASE_URL.endsWith("/")
+  ? import.meta.env.BASE_URL
+  : `${import.meta.env.BASE_URL}/`;
+const withBasePath = (path: string) => `${basePath}${path.replace(/^\//, "")}`;
 
 function formatDate(value: string | undefined) {
   if (!value) {
@@ -32,7 +36,7 @@ function formatDate(value: string | undefined) {
       posts.length ? (
         <section class="post-list" aria-label="Posts">
           {posts.map((post) => (
-            <a class="post-row" href={`/posts/${post.slug}/`}>
+            <a class="post-row" href={withBasePath(`posts/${post.slug}/`)}>
               <time datetime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
               <span>
                 <h2>{post.title}</h2>

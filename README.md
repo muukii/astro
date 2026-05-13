@@ -39,6 +39,35 @@ npm run build
 npm run preview
 ```
 
+## GitHub Pages
+
+`main`にpushすると、GitHub ActionsがCraft APIから記事を取得して静的サイトをビルドし、GitHub Pagesへデプロイします。
+
+Repository settingsで次を設定してください。
+
+Secrets:
+
+```text
+CRAFT_API_BASE_URL
+```
+
+任意のSecrets:
+
+```text
+CRAFT_API_TOKEN
+CRAFT_COLLECTION_ID
+```
+
+任意のVariables:
+
+```text
+CRAFT_COLLECTION_NAME=Posts
+SITE_TITLE=Craft Journal
+SITE_URL=https://muukii.github.io
+```
+
+GitHub PagesのSourceは`GitHub Actions`を選択してください。project pageとして配信される場合、CI上では自動で`/astro/`をbase pathにします。
+
 ## Content Mapping
 
 - `GET /collections`で`Posts` collectionを探します。
