@@ -1,0 +1,44 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getBlogPost, getBlogPosts } from "../../lib/blog";
+
+export async function getStaticPaths() {
+  const posts = await getBlogPosts();
+
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+  }));
+}
+
+const post = await getBlogPost(Astro.params.slug ?? "");
+
+if (!post) {
+  return Astro.redirect("/");
+}
+
+function formatDate(value: string | undefined) {
+  if (!value) {
+    return "No date";
+  }
+
+  return new Intl.DateTimeFormat("ja-JP", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  }).format(new Date(value));
+}
+---
+
+<BaseLayout title={post.title} description={post.excerpt}>
+  <article>
+    <header class="post-header">
+      <p class="eyebrow">Article</p>
+      <h1>{post.title}</h1>
+      <p class="post-meta">
+        <time datetime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
+        {post.updatedAt && <> / Updated {formatDate(post.updatedAt)}</>}
+      </p>
+    </header>
+    <div class="post-body" set:html={post.html} />
+  </article>
+</BaseLayout>
