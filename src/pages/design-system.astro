@@ -1,0 +1,209 @@
+---
+import { ArrowRight, ArrowUpRight, Check, Command, Sparkles } from "lucide-react";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+
+const swatches = [
+  { name: "Canvas", className: "swatch-bg" },
+  { name: "Ink", className: "swatch-fg" },
+  { name: "Surface", className: "swatch-card" },
+  { name: "Soft Fill", className: "swatch-muted" },
+  { name: "Action", className: "swatch-accent" },
+  { name: "Divider Fill", className: "swatch-border" },
+];
+---
+
+<BaseLayout
+  title="Design System"
+  description="Component inventory for the Craft blog."
+  noindex
+  shellClass="system-shell"
+>
+  <div class="system-page">
+    <section class="system-hero">
+      <Badge variant="outline" className="system-kicker">
+        <Sparkles aria-hidden="true" />
+        Foundation
+      </Badge>
+      <h1>Why Craft Journal feels premium</h1>
+      <p>Soft fills, calm spacing, and bento-like content blocks for a readable Craft-powered journal.</p>
+    </section>
+
+    <section class="system-bento" aria-label="Design Direction">
+      <Card className="system-panel bento-card bento-card--tall">
+        <CardContent>
+          <div class="bento-visual bento-visual--article">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <h2>Editorial surfaces that feel soft, focused, and easy to scan.</h2>
+          <Button className="system-pill-button">
+            Explore system
+            <ArrowRight aria-hidden="true" />
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card className="system-panel bento-card bento-card--media">
+        <CardContent>
+          <div class="bento-photo bento-photo--code"></div>
+          <h2>Trusted by <span>notes, links, code, and diagrams.</span></h2>
+        </CardContent>
+      </Card>
+
+      <Card className="system-panel bento-card bento-card--stat">
+        <CardContent>
+          <span class="stat-number">16</span>
+          <p>Static pages built from Craft content.</p>
+        </CardContent>
+      </Card>
+
+      <Card className="system-panel bento-card bento-card--wide">
+        <CardContent>
+          <h2>Transforms nested Craft pages into a polished reading system.</h2>
+          <div class="bento-profile">
+            <span></span>
+          </div>
+        </CardContent>
+      </Card>
+    </section>
+
+    <section class="system-section" aria-label="Tokens">
+      <div class="system-section__header">
+        <Badge variant="outline" className="system-kicker">Tokens</Badge>
+        <h2>Color and rhythm</h2>
+        <p>Foundation values are expressed as fill layers, not strokes.</p>
+      </div>
+
+      <div class="swatch-grid">
+        {swatches.map((swatch) => (
+          <div class="swatch-item">
+            <span class={`swatch ${swatch.className}`}></span>
+            <span>{swatch.name}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class="system-section" aria-label="Content Components">
+      <div class="system-section__header">
+        <Badge variant="outline" className="system-kicker">Components</Badge>
+        <h2>Content surfaces</h2>
+        <p>Cards, labels, and actions share the same soft-fill language.</p>
+      </div>
+
+      <div class="component-grid">
+        <Card className="post-card system-sample-card">
+          <a class="post-card__link" href="/posts/craft-playground-FF356CB3/">
+            <time datetime="2026-05-13">2026年5月13日</time>
+            <span class="post-card__body">
+              <h2>Craft Playground</h2>
+              <p>Nested pages, code blocks, rich URLs, and diagrams rendered from Craft.</p>
+              <span class="tags" aria-label="Tags">
+                <Badge variant="secondary" className="tag-badge">Craft</Badge>
+                <Badge variant="secondary" className="tag-badge">Astro</Badge>
+              </span>
+            </span>
+          </a>
+        </Card>
+
+        <Card className="system-panel">
+          <CardHeader>
+            <CardTitle>Controls</CardTitle>
+            <CardAction><Badge variant="outline">Live</Badge></CardAction>
+            <CardDescription>Buttons, badges, and compact metadata</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div class="button-row">
+              <Button>Publish</Button>
+              <Button variant="secondary">Preview</Button>
+              <Button variant="outline">
+                <Command aria-hidden="true" />
+                Shortcut
+              </Button>
+              <Button variant="ghost" size="icon" aria-label="Open">
+                <ArrowUpRight aria-hidden="true" />
+              </Button>
+            </div>
+            <div class="badge-row">
+              <Badge>Default</Badge>
+              <Badge variant="secondary">Secondary</Badge>
+              <Badge variant="outline">Soft</Badge>
+              <Badge variant="destructive">Draft</Badge>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </section>
+
+    <section class="system-section" aria-label="Embeds">
+      <div class="system-section__header">
+        <Badge variant="outline" className="system-kicker">Embeds</Badge>
+        <h2>Craft blocks</h2>
+        <p>Link previews and nested pages become lightweight rows.</p>
+      </div>
+
+      <div class="embed-stack">
+        <a class="link-preview" href="https://github.com/VergeGroup/swift-state-graph">
+          <span class="link-preview__icon" aria-hidden="true">↗</span>
+          <span class="link-preview__content">
+            <span class="link-preview__label">github.com</span>
+            <strong>VergeGroup / swift-state-graph</strong>
+            <span>A next-generation graph-based state management library for SwiftUI and UIKit.</span>
+          </span>
+        </a>
+
+        <a class="page-preview" href="/posts/craft-playground-FF356CB3/nesting-982F3254/">
+          <span class="page-preview__icon" aria-hidden="true"></span>
+          <span class="page-preview__content">
+            <strong>Nesting</strong>
+            <span>Hello</span>
+          </span>
+        </a>
+
+        <figure class="code-card">
+          <figcaption>Swift</figcaption>
+          <pre class="shiki system-code"><code><span>func hello() {</span><span>  print("Craft")</span><span>}</span></code></pre>
+        </figure>
+      </div>
+    </section>
+
+    <section class="system-section" aria-label="Editorial Layout">
+      <div class="system-section__header">
+        <Badge variant="outline" className="system-kicker">Editorial</Badge>
+        <h2>Article shell</h2>
+        <p>Long-form pages keep the same quiet fill hierarchy.</p>
+      </div>
+
+      <Card className="system-editorial">
+        <CardContent>
+          <div class="system-editorial__meta">
+            <Badge variant="outline">Article</Badge>
+            <span>Updated May 13, 2026</span>
+          </div>
+          <h3>SwiftUI closure comparison is just memory</h3>
+          <p>
+            Large titles carry the page. Body text stays quiet, links are clear, and embedded blocks use a product-like density.
+          </p>
+          <Separator />
+          <div class="system-checks">
+            <span><Check aria-hidden="true" /> Static build</span>
+            <span><Check aria-hidden="true" /> Nested pages</span>
+            <span><Check aria-hidden="true" /> Dark mode</span>
+          </div>
+        </CardContent>
+      </Card>
+    </section>
+  </div>
+</BaseLayout>

@@ -405,12 +405,12 @@ function renderLinkPreview(block: CraftBlock) {
   const domain = domainForUrl(url);
 
   return `<a class="link-preview" href="${escapeHtml(url)}">
+  <span class="link-preview__icon" aria-hidden="true">↗</span>
   <span class="link-preview__content">
     <span class="link-preview__label">${escapeHtml(domain)}</span>
     <strong>${escapeHtml(stripMarkdown(title))}</strong>
     ${description ? `<span>${escapeHtml(description)}</span>` : ""}
   </span>
-  <span class="link-preview__arrow" aria-hidden="true">↗</span>
 </a>`;
 }
 
