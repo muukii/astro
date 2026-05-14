@@ -29,6 +29,7 @@ const withBasePath = (path: string) => `${basePath}${path.replace(/^\//, "")}`;
     <meta charset="utf-8" />
     <link rel="icon" type="image/svg+xml" href={withBasePath("favicon.svg")} />
     <link rel="icon" href={withBasePath("favicon.ico")} />
+    <link rel="alternate" type="application/rss+xml" title={`${siteTitle} RSS`} href={withBasePath("rss.xml")} />
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content={description} />
     {noindex && <meta name="robots" content="noindex,nofollow" />}

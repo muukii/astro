@@ -14,6 +14,8 @@ cp .env.example .env
 CRAFT_API_BASE_URL="https://connect.craft.do/links/YOUR_ID/api/v1"
 CRAFT_COLLECTION_NAME="Posts"
 SITE_TITLE="Craft Journal"
+# SITE_URL is optional locally. In CI it is used for RSS/canonical absolute URLs.
+# SITE_URL="https://muukii.github.io"
 ```
 
 collection ID が分かっている場合は、名前解決を省略できます。
@@ -67,6 +69,10 @@ SITE_URL=https://muukii.github.io
 ```
 
 GitHub PagesのSourceは`GitHub Actions`を選択してください。project pageとして配信される場合、CI上では自動で`/astro/`をbase pathにします。
+
+## RSS
+
+`/rss.xml`でRSS 2.0 feedを生成します。記事一覧と同じCraft collectionをビルド時に読み、各記事のタイトル、抜粋、本文HTML、公開日、タグを出力します。
 
 ## Content Mapping
 
