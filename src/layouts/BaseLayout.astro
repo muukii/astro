@@ -31,6 +31,8 @@ const withBasePath = (path: string) => `${basePath}${path.replace(/^\//, "")}`;
     <link rel="icon" href={withBasePath("favicon.ico")} />
     <link rel="alternate" type="application/rss+xml" title={`${siteTitle} RSS`} href={withBasePath("rss.xml")} />
     <meta name="viewport" content="width=device-width" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#fcfcfc" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#101010" />
     <meta name="description" content={description} />
     {noindex && <meta name="robots" content="noindex,nofollow" />}
     <meta name="generator" content={Astro.generator} />
@@ -54,23 +56,37 @@ const withBasePath = (path: string) => `${basePath}${path.replace(/^\//, "")}`;
       <header class="site-header">
         <div class="site-header__inner">
           <a class="brand" href={basePath}>{siteTitle}</a>
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            className="theme-toggle"
-            data-theme-toggle
-            aria-label="テーマを切り替え"
-            title="テーマを切り替え"
-          >
-            <Sun data-theme-icon="sun" aria-hidden="true" />
-            <Moon data-theme-icon="moon" aria-hidden="true" />
-          </Button>
+          <div class="site-header__actions">
+            <nav class="site-nav" aria-label="サイト">
+              <a href={withBasePath("rss.xml")}>rss</a>
+            </nav>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className="theme-toggle"
+              data-theme-toggle
+              aria-label="テーマを切り替え"
+              title="テーマを切り替え"
+            >
+              <Sun data-theme-icon="sun" aria-hidden="true" />
+              <Moon data-theme-icon="moon" aria-hidden="true" />
+            </Button>
+          </div>
         </div>
       </header>
       <main class="site-main">
         <slot />
       </main>
+      <footer class="site-footer">
+        <div class="site-footer__inner">
+          <span>© {new Date().getFullYear()} {siteTitle}</span>
+          <span class="site-footer__links">
+            <a href={withBasePath("rss.xml")}>rss</a>
+            <a href={withBasePath("design-system/")}>design</a>
+          </span>
+        </div>
+      </footer>
     </div>
     <script is:inline>
       (() => {
