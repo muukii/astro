@@ -14,12 +14,12 @@ import {
 import { Separator } from "@/components/ui/separator";
 
 const swatches = [
-  { name: "Canvas", className: "swatch-bg" },
-  { name: "Ink", className: "swatch-fg" },
-  { name: "Surface", className: "swatch-card" },
-  { name: "Soft Fill", className: "swatch-muted" },
-  { name: "Action", className: "swatch-accent" },
-  { name: "Divider Fill", className: "swatch-border" },
+  { name: "canvas ▸ gray-1", className: "swatch-bg" },
+  { name: "ink ▸ gray-12", className: "swatch-fg" },
+  { name: "surface ▸ card", className: "swatch-card" },
+  { name: "soft fill ▸ gray-2", className: "swatch-muted" },
+  { name: "tint ▸ systemBlue", className: "swatch-tint" },
+  { name: "hairline ▸ border", className: "swatch-border" },
 ];
 ---
 
@@ -27,7 +27,6 @@ const swatches = [
   title="Design System"
   description="Component inventory for the Craft blog."
   noindex
-  shellClass="system-shell"
 >
   <div class="system-page">
     <section class="system-hero">
@@ -35,8 +34,8 @@ const swatches = [
         <Sparkles aria-hidden="true" />
         Foundation
       </Badge>
-      <h1>Why Craft Journal feels premium</h1>
-      <p>Soft fills, calm spacing, and bento-like content blocks for a readable Craft-powered journal.</p>
+      <h1>Quiet grays, hairlines, and system type</h1>
+      <p>A 12-step neutral ramp, one systemBlue tint, hairline rings instead of borders, and SF rendered through the system font stack.</p>
     </section>
 
     <section class="system-bento" aria-label="Design Direction">
@@ -83,7 +82,7 @@ const swatches = [
       <div class="system-section__header">
         <Badge variant="outline" className="system-kicker">Tokens</Badge>
         <h2>Color and rhythm</h2>
-        <p>Foundation values are expressed as fill layers, not strokes.</p>
+        <p>A monochrome ramp does the layering; color appears only as the tint, plus systemRed for destructive states.</p>
       </div>
 
       <div class="swatch-grid">
@@ -194,7 +193,7 @@ const swatches = [
           </div>
           <h3>SwiftUI closure comparison is just memory</h3>
           <p>
-            Large titles carry the page. Body text stays quiet, links are clear, and embedded blocks use a product-like density.
+            Titles stay modest; hierarchy comes from the mono labels and gray steps. Links pick up the tint, and embedded blocks keep a spec-sheet density.
           </p>
           <Separator />
           <div class="system-checks">
