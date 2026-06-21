@@ -215,6 +215,10 @@ async function blockToMarkdown(
     return `![${block.altText ?? ""}](${block.url})`;
   }
 
+  if (block.type === "video" && block.url) {
+    return renderVideo(block);
+  }
+
   if (block.type === "richUrl" && block.url) {
     return renderLinkPreview(block);
   }
@@ -414,6 +418,19 @@ function renderLinkPreview(block: CraftBlock) {
 </a>`;
 }
 
+function renderVideo(block: CraftBlock) {
+  const url = block.url ?? "";
+  const caption = stripMarkdown(block.altText ?? block.description ?? "");
+  const fallbackLabel = caption || "Open video";
+
+  return `<figure class="video-card">
+  <video class="video-card__player" src="${escapeHtml(url)}" controls autoplay muted loop playsinline>
+    <a href="${escapeHtml(url)}">${escapeHtml(fallbackLabel)}</a>
+  </video>
+  ${caption ? `<figcaption>${escapeHtml(caption)}</figcaption>` : ""}
+</figure>`;
+}
+
 function renderPagePreview(page: Pick<BlogPost, "title" | "excerpt" | "path">) {
   return `<a class="page-preview" href="${escapeHtml(postHref(page.path))}">
   <span class="page-preview__icon" aria-hidden="true"></span>
@@ -555,8 +572,10 @@ function sanitize(html: string) {
       "figcaption",
       "figure",
       "img",
+      "source",
       "span",
       "strong",
+      "video",
       "h1",
       "h2",
       "h3",
@@ -587,9 +606,25 @@ function sanitize(html: string) {
       img: ["src", "alt", "title", "width", "height", "loading"],
       pre: ["class", "style", "tabindex"],
       span: ["class", "style"],
+      video: [
+        "src",
+        "class",
+        "controls",
+        "autoplay",
+        "playsinline",
+        "preload",
+        "muted",
+        "loop",
+        "poster",
+        "width",
+        "height",
+      ],
+      source: ["src", "type"],
     },
     allowedSchemesByTag: {
       img: ["http", "https", "data"],
+      video: ["http", "https"],
+      source: ["http", "https"],
     },
     transformTags: {
       a: (tagName, attribs) => {
