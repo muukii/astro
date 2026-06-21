@@ -178,6 +178,33 @@ const swatches = [
       </div>
     </section>
 
+    <section class="system-section" aria-label="Media">
+      <div class="system-section__header">
+        <Badge variant="outline" className="system-kicker">Media</Badge>
+        <h2>Image &amp; video frames</h2>
+        <p>Images and videos share one fixed height and aspect-fit inside it, so embeds reserve a stable box and never expand or shift the page on load.</p>
+      </div>
+
+      <div class="media-frame-demo">
+        <figure class="media-frame-sample">
+          <div class="media-frame-box media-frame-box--portrait"><span>9 : 16</span></div>
+          <figcaption>portrait · hugs width</figcaption>
+        </figure>
+        <figure class="media-frame-sample">
+          <div class="media-frame-box media-frame-box--square"><span>1 : 1</span></div>
+          <figcaption>square</figcaption>
+        </figure>
+        <figure class="media-frame-sample">
+          <div class="media-frame-box media-frame-box--landscape"><span>16 : 9</span></div>
+          <figcaption>landscape · letterboxed</figcaption>
+        </figure>
+      </div>
+
+      <p class="media-frame-token">
+        <code>--media-frame-height</code> ▸ <code>min(70vh, 560px)</code> · scaled down here for display
+      </p>
+    </section>
+
     <section class="system-section" aria-label="Editorial Layout">
       <div class="system-section__header">
         <Badge variant="outline" className="system-kicker">Editorial</Badge>

@@ -97,6 +97,9 @@
     --chart-4: var(--gray-7);
     --chart-5: var(--gray-12);
     --radius: 0.625rem;
+    /* Fixed frame height for content media (images + videos) in articles.
+       Keeps every embed a consistent, reserved size — no layout shift. */
+    --media-frame-height: min(70vh, 560px);
     --sidebar: var(--gray-2);
     --sidebar-foreground: var(--gray-12);
     --sidebar-primary: var(--gray-12);
@@ -627,28 +630,25 @@
     text-decoration: var(--shiki-dark-text-decoration);
   }
 
-  .post-body img {
-    max-width: 100%;
-    border-radius: var(--radius-lg);
-    box-shadow: 0 0 0 1px var(--hairline);
-  }
-
-  .video-card {
-    margin: 0;
-  }
-
+  /* Content media frame — images and videos share a fixed height and
+     aspect-fit, so each embed reserves a stable box and never expands or
+     shifts the page on load (their intrinsic sizes are unknown at build time).
+     Mermaid diagrams keep their own sizing. */
+  .post-body img:not(.mermaid-card__image),
   .post-body video,
   .video-card__player {
     display: block;
-    /* Fixed height + aspect-fit: reserves a stable frame without knowing the
-       video's intrinsic size, so there is no vertical layout shift on load. */
-    height: min(70vh, 560px);
+    height: var(--media-frame-height);
     width: auto;
     max-width: 100%;
     margin-inline: auto;
     object-fit: contain;
     border-radius: var(--radius-lg);
     box-shadow: 0 0 0 1px var(--hairline);
+  }
+
+  .video-card {
+    margin: 0;
   }
 
   .video-card figcaption {
@@ -769,6 +769,55 @@
   }
 
   /* ---- design system page ---- */
+
+  .media-frame-demo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1rem;
+  }
+
+  .media-frame-sample {
+    margin: 0;
+  }
+
+  .media-frame-box {
+    display: grid;
+    place-items: center;
+    height: 13rem;
+    max-width: 100%;
+    background: var(--gray-2);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 0 0 1px var(--hairline);
+    color: var(--muted-foreground);
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .media-frame-box--portrait {
+    width: 7.3rem;
+  }
+
+  .media-frame-box--square {
+    width: 13rem;
+  }
+
+  .media-frame-box--landscape {
+    width: 23rem;
+  }
+
+  .media-frame-sample figcaption {
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--muted-foreground);
+    text-align: center;
+  }
+
+  .media-frame-token {
+    margin-top: 0.9rem;
+    font-size: 0.85rem;
+    color: var(--muted-foreground);
+  }
 
   .system-kicker {
     gap: 0.4rem;
